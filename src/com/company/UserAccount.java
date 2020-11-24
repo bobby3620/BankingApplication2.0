@@ -3,120 +3,125 @@ package com.company;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class UserAccount{
+public class UserAccount extends UserAccountUI{
 
-    //Scanner object to collect user input
-    Scanner keyboard = new Scanner(System.in);
+    //Classes
+    Scanner kbInput = new Scanner(System.in);
 
-    //ArrayList containing: this will store all usernames and passwords in separate lists
-    ArrayList<String> username = new ArrayList<>();
-    ArrayList<String> password = new ArrayList<>();
+    //ArrayLists
+    ArrayList<Double> currentBalance = new ArrayList<>();
+    ArrayList<Integer> transactionHistoryID = new ArrayList<>();
+    ArrayList<String> transactionHistory = new ArrayList<>();
 
-    //ArrayList spot for totalBalance
-    ArrayList<Double> totalBalance = new ArrayList<>();
+    //Variables for Person
+    String name;
+    String password;
+    int ID;
 
-    //Variables
-    String user;
-    String pass;
+    //Variables for deposit and withdraw methods
+    double totalBalance;
     double depositAmount;
-    double withdrawAmount;
-    double userBalance;
-
+    double newBalance;
+    double withdrawBalance;
 
     public UserAccount(){
 
     }
 
-    public void getUsers(String un, String p){
-        user = un;
-        pass = p;
+    public UserAccount(String n, String p, int identification){
+        this.name = n;
+        this.password = p;
+        this.ID = identification;
     }
 
-    // This checks if an user already exists
+    public void getUsers(String n, String p){
+        this.name = n;
+        this.password = p;
+        this.currentBalance.add(0.0);
+    }
+
+    private void getID(){
+        for(int i = 0; i < person.size(); i++){
+            if(person.get(i).name.equalsIgnoreCase(name) && person.get(i).password.equals(password)){
+                this.ID = person.get(i).ID;
+            }
+        }
+    }
+
     public boolean checkNewUserAccount(){
-        for(int i = 0; i < username.size(); i++){
-            if(user.equalsIgnoreCase(username.get(i)) || pass.equalsIgnoreCase(password.get(i))){
+        for(int i = 0; i < person.size(); i++){
+            if(person.get(i).name.equalsIgnoreCase(name) || person.get(i).password.equals(password)){
                 return true;
             }
         }
         return false;
-    }
-
-    public void setUserAccount(){
-        //adding to an arrayList is simply .add()
-        username.add(user);
-        password.add(pass);
-        totalBalance.add(0.0); // initialize user account with balance of 0
     }
 
     public boolean checkUserAccount(){
-        for(int i = 0; i < username.size(); i++){
-            if(user.equalsIgnoreCase(username.get(i)) && pass.equals(password.get(i))){
+        for(int i = 0; i < person.size(); i++){
+            if(person.get(i).name.equalsIgnoreCase(name) && person.get(i).password.equals(password)){
                 return true;
             }
         }
         return false;
     }
 
-    // When doing the deposit and withdraw method and then setting the total balance, make sure the total balance corresponds to the correct account ->
-    // Relate to the if statement in the checkBalance method and you'll end up using the .set() method rather than the .add() since you're changing the value already there
-    // .set(i, depositValue or withdrawValue) -> this'll correspond to whatever account is active.
-    // totalBalance.get(i) will retrieve the value corresponding to the account
-
-    //deposit method here
     public void depositMethod(){
-        for (int i = 0; i < totalBalance.size(); i++) {
-            if (user.equalsIgnoreCase(username.get(i)) && pass.equals(password.get(i))) {
-                userBalance = (totalBalance.get(i));
-                System.out.printf(user.substring(0,1).toUpperCase() + user.substring(1) + " your current balance is: $%.2f \n", userBalance);
-                System.out.println("Enter deposit amount: ");
-                depositAmount = keyboard.nextDouble();
+        getID();
+        totalBalance = currentBalance.get(ID);
+        System.out.println("\n" + name.substring(0,1).toUpperCase() + name.substring(1) + " your current amount is: " + totalBalance);
+        System.out.println("Enter an amount greater than zero");
+        depositAmount = kbInput.nextDouble();
 
-                while (depositAmount < 0) {
-                    System.out.println("Enter deposit amount: ");
-                    depositAmount = keyboard.nextDouble();
-                }
-
-                double newBalance = userBalance + depositAmount;
-                totalBalance.set(i, newBalance);
-                System.out.printf(user.substring(0,1).toUpperCase() + user.substring(1) + " your new balance is: $%.2f \n", newBalance);
-                break; //no point in continuing the loop
-            }
+        while(depositAmount < 0){
+            System.out.println("Enter amount: ");
+            depositAmount = kbInput.nextDouble();
         }
+
+        newBalance = (totalBalance + depositAmount);
+
+        transactionHistoryID.add(ID);
+        transactionHistory.add("you deposited: " + depositAmount);
+        currentBalance.set(ID, newBalance);
+        System.out.println("\n" + "Your new balance is: " + newBalance);
     }
 
-
-    //withdraw method here
     public void withdrawMethod(){
-            //Find the user account
-            for (int i = 0; i < totalBalance.size(); i++) {
-                if (user.equalsIgnoreCase(username.get(i)) && pass.equals(password.get(i))) {
-                    userBalance = totalBalance.get(i);
-                    System.out.printf(user.substring(0,1).toUpperCase() + user.substring(1) + " your current balance is: $%.2f \n", userBalance);
-                    System.out.println("Enter withdraw amount: ");
-                    withdrawAmount = keyboard.nextDouble();
+        getID();
+        totalBalance = currentBalance.get(ID);
+        System.out.println("\n" + name.substring(0,1).toUpperCase() + name.substring(1) + " your current amount is: " + totalBalance);
+        System.out.println("Please enter an amount greater than zero");
+        withdrawBalance = kbInput.nextDouble();
 
-                    while (withdrawAmount > userBalance) {
-                        System.out.println("Insufficient funds available." + "\n" + "Enter withdraw amount: ");
-                        withdrawAmount = keyboard.nextDouble();
-                    }
-
-                    double newBalance = userBalance - withdrawAmount;
-                    totalBalance.set(i, newBalance);
-                    System.out.printf(user.substring(0,1).toUpperCase() + user.substring(1) + " your new balance is: $%.2f \n", newBalance);
-                    break;
-                }
-            }
+        while(withdrawBalance < 0){
+            System.out.println("Enter amount: ");
+            withdrawBalance = kbInput.nextDouble();
         }
 
-    //This method allows for the correct balance to be shown for the corresponding account
-    //totalBalance.get(0) == username.get(0) and so on
+        newBalance = (totalBalance - withdrawBalance);
+        while(newBalance < 0){
+            System.out.println("insufficient funds, reenter amount: ");
+            withdrawBalance = kbInput.nextDouble();
+            newBalance = (totalBalance - withdrawBalance);
+        }
+
+        transactionHistoryID.add(ID);
+        transactionHistory.add("you withdrew: " + withdrawBalance);
+        currentBalance.set(ID, newBalance);
+
+        System.out.println("\n" + "Your new balance is: " + newBalance);
+    }
+
     public void checkBalance(){
-        for(int i = 0; i < totalBalance.size(); i++){
-            if(user.equalsIgnoreCase(username.get(i)) && pass.equals(password.get(i))){
-                userBalance = totalBalance.get(i);
-                System.out.printf(user.substring(0,1).toUpperCase() + user.substring(1) + " your current balance is: $%.2f \n", userBalance);
-                break;
+        getID();
+        System.out.println(name.substring(0,1).toUpperCase() + name.substring(1) + " your current balance is: " + currentBalance.get(ID));
+    }
+
+    public void checkUserTransactionHistory(){
+        getID();
+        for(int i = 0; i < transactionHistory.size(); i++){
+            if(transactionHistoryID.get(i).equals(ID)){
+                System.out.println(transactionHistory.get(i));
             }
         }
     }
